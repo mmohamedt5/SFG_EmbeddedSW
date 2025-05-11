@@ -150,3 +150,30 @@ void printWifiStatus() {
   Serial.print(WiFi.RSSI());
   Serial.println(" dBm");
 }
+
+/*
+Code to connect with the flask backend web app
+*/
+void sendDataToServer() {
+  if (client.connect("your-server-ip", 5000)) {
+      // Create JSON data
+      String jsonData = "{\"device_id\":\"arduino_001\",\"temperature\":" + String(curr_temp) + "}";
+      
+      // Send POST request
+      client.println("POST /api/data HTTP/1.1");
+      client.println("Host: your-server-ip:5000");
+      client.println("Content-Type: application/json");
+      client.print("Content-Length: ");
+      client.println(jsonData.length());
+      client.println();
+      client.println(jsonData);
+      
+      // Wait for response
+      while (client.available()) {
+          String line = client.readStringUntil('\r');
+          Serial.print(line);
+      }
+      
+      client.stop();
+  }
+}
